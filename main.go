@@ -5,9 +5,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"zebra/internal/video_consumer"
 
 	"github.com/IBM/sarama"
 	"github.com/joho/godotenv"
+
 )
 
 func main() {
@@ -95,7 +97,7 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO - SEND MESSAGE TO KAFKA
-
+	videoconsumer.ProcessVideo(tempFile.Name())
 	fmt.Fprint(w, "Video processed successfully!")
 }
 
