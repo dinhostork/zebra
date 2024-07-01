@@ -1,0 +1,40 @@
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.so
+
+# Executables
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go binary
+bin/
+
+# Go test cache and coverage files
+*.test
+*.out
+*.cover
+
+# Go build cache
+*.testcache
+*.cache
+
+# Vendor directory
+vendor/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+
+# Environment variables file
+.env
