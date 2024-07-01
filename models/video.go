@@ -11,11 +11,12 @@ var db *gorm.DB
 
 type Video struct {
 	gorm.Model
-	OrginalFilePath string    `json:"original_file_path"`
-	FilePath        string    `json:"file_path"`
-	ProcessedAt     time.Time `json:"processed_at"`
-	Url             string    `json:"url"`
-	Failed          bool      `json:"failed"`
+	OrginalFilePath string     `json:"original_file_path"`
+	FilePath        string     `json:"file_path"`
+	Title           *string    `json:"title"`
+	ProcessedAt     *time.Time `json:"processed_at"`
+	Url             string     `json:"url"`
+	Failed          bool       `json:"failed"`
 }
 
 func init() {
