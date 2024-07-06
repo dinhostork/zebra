@@ -25,18 +25,7 @@ func main() {
 	}
 	defer partitionConsumer.Close()
 
-	handleMessages(partitionConsumer)
-}
-
-func handleMessages(partitionConsumer sarama.PartitionConsumer) {
-	for {
-		select {
-		case msg := <-partitionConsumer.Messages():
-			processMessage(msg)
-		case err := <-partitionConsumer.Errors():
-			log.Printf("Error consuming message: %v", err)
-		}
-	}
+	shared.HandleMessages(partitionConsumer, processMessage)
 }
 
 func processMessage(msg *sarama.ConsumerMessage) {
