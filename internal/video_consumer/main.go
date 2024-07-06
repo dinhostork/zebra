@@ -40,10 +40,7 @@ func main() {
 			createVideo.Save()
 
 			// send video to transcoding service
-			// (placeholder for your transcoding logic)
 			fmt.Printf("Video '%s' saved to database\n", videoFile)
-
-			// remove from Kafka topic
 
 		case err := <-partitionConsumer.Errors():
 			fmt.Printf("Error consuming message: %v\n", err)
