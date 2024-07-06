@@ -41,6 +41,19 @@ func processMessage(msg *sarama.ConsumerMessage) {
 		return
 	}
 	fmt.Printf("Video '%s' transcoded successfully\n", videoFile)
+
+	// at this point, we would save the original video file to a storage service
+	if err := saveOriginalVideo(videoFile); err != nil {
+		log.Printf("Error saving original video file: %v", err)
+		return
+	}
+
+	if err := sendMessageToWatermarkService(videoFile); err != nil {
+		log.Printf("Error sending message to watermark service: %v", err)
+		return
+	}
+
+	fmt.Printf("Video '%s' sent to watermark service\n", videoFile)
 }
 
 func transcodeVideo(videoFile string) error {
@@ -76,5 +89,28 @@ func transcodeToFormat(videoFile, format string) error {
 	if err := stream.Run(); err != nil {
 		return fmt.Errorf("error running ffmpeg for %s: %v", format, err)
 	}
+	return nil
+}
+
+func sendMessageToWatermarkService(videoFile string) error {
+	producer, err := shared.InitKafkaProducer(shared.VIDEO_WATERMARK_TOPIC)
+	if err != nil {
+		return fmt.Errorf("error creating producer: %v", err)
+	}
+	defer producer.Close()
+
+	_, _, err = producer.SendMessage(&sarama.ProducerMessage{
+		Topic: shared.VIDEO_WATERMARK_TOPIC,
+		Value: sarama.StringEncoder(videoFile),
+	})
+	if err != nil {
+		return fmt.Errorf("error sending message to watermark service: %v", err)
+	}
+
+	return nil
+}
+
+func saveOriginalVideo(videoFile string) error {
+	// Save the original video file somewhere
 	return nil
 }
