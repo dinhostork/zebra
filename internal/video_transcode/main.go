@@ -79,7 +79,7 @@ func transcodeToFormat(videoFile, format string) error {
 
 	switch format {
 	case ".mp4":
-		stream = stream.Output(outputFile, ffmpeg_go.KwArgs{"c:v": "libx264", "crf": 23, "preset": "medium"})
+		stream = stream.Output(outputFile, ffmpeg_go.KwArgs{"c:v": "libx264", "crf": 22, "preset": "slow", "vcodec": "h264"})
 	default:
 		return fmt.Errorf("unsupported format: %s", format)
 	}
