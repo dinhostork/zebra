@@ -25,10 +25,11 @@ func init() {
 	db.AutoMigrate(&Video{})
 }
 
-func (v *Video) Save() *Video {
-	db.NewRecord(v)
-	db.Create(&v)
-	return v
+func (v *Video) Save() error {
+	if err := db.Create(&v).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func GetVideoById(id string) (*Video, *gorm.DB) {
