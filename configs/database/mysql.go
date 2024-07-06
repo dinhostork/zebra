@@ -1,12 +1,11 @@
 package configs
 
 import (
-	"log"
 	"os"
+	"zebra/shared"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -14,10 +13,7 @@ var (
 )
 
 func Connect() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	shared.LoadEnv("../..")
 
 	user := os.Getenv("MYSQL_USER")
 	password := os.Getenv("MYSQL_PASSWORD")
