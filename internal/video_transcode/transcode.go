@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"zebra/models"
+	"zebra/shared"
 
 	"github.com/google/uuid"
 
@@ -27,6 +28,9 @@ func ProcessMessage(msg *sarama.ConsumerMessage) {
 	}
 	fmt.Printf("Video '%s' transcoded successfully\n", strconv.Itoa(int(videoFile.ID)))
 	defer RemoveFile(videoFile.TempFilePath)
+
+	SendToWatermarkService(*videoFile)
+	fmt.Printf("Video '%s' sent to watermark service\n", video_id)
 }
 
 func TranscodeVideo(video models.Video) error {
@@ -77,4 +81,26 @@ func RemoveFile(filePath string) error {
 		return fmt.Errorf("error removing file %s: %v", filePath, err)
 	}
 	return nil
+}
+
+func SendToWatermarkService(video models.Video) {
+	producer, err := shared.InitKafkaProducer(shared.VIDEO_WATERMARK_TOPIC)
+	if err != nil {
+		log.Printf("Error creating producer: %v", err)
+		return
+	}
+
+	defer producer.Close()
+
+	_, _, err = producer.SendMessage(&sarama.ProducerMessage{
+		Topic: shared.VIDEO_WATERMARK_TOPIC,
+		Value: sarama.StringEncoder(strconv.Itoa(int(video.ID))),
+	})
+	if err != nil {
+		log.Printf("Error sending message to watermark service: %v", err)
+		return
+	}
+
+	fmt.Printf("Video '%s' sent to watermark service\n", strconv.Itoa(int(video.ID)))
+
 }

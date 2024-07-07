@@ -13,6 +13,7 @@ type Video struct {
 	gorm.Model
 	TempFilePath   string     `json:"temp_file_path"`
 	TranscodedPath *string    `json:"transcoded_path"`
+	Path           *string    `json:"path"`
 	Title          *string    `json:"title"`
 	ProcessedAt    *time.Time `json:"processed_at"`
 	Url            string     `json:"url"`

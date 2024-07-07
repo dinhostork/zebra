@@ -8,44 +8,47 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"zebra/models"
 
 	"github.com/IBM/sarama"
+	"github.com/google/uuid"
 )
 
 func ProcessMessage(msg *sarama.ConsumerMessage) {
-	videoFile := string(msg.Value)
-	fmt.Printf("Received video file: %s\n", videoFile)
+	video_id := string(msg.Value)
 
-	fmt.Printf("Adding watermark to video '%s'\n", videoFile)
-	if err := addWatermark(videoFile); err != nil {
-		log.Printf("Failed to add watermark to video '%s': %v", videoFile, err)
+	fmt.Printf("Received video file: %s\n", video_id)
+
+	// Get the video file from the database
+	videoFile, db := models.GetVideoById(video_id)
+
+	defer db.Close()
+
+	fmt.Printf("Adding watermark to video '%s'\n", strconv.Itoa(int(videoFile.ID)))
+	if err := addWatermark(*videoFile); err != nil {
+		log.Printf("Failed to add watermark to video '%s': %v", strconv.Itoa(int(videoFile.ID)), err)
 		return
 	}
-	fmt.Printf("Watermark added to video '%s'\n", videoFile)
+	fmt.Printf("Watermark added to video '%s'\n", strconv.Itoa(int(videoFile.ID)))
 
-	// At this point, we would save the watermarked video file to a storage service
-	if err := saveWatermarkedVideo(videoFile); err != nil {
-		log.Printf("Error saving watermarked video file: %v", err)
-		return
-	}
-
-	fmt.Printf("Watermarked video '%s' saved\n", videoFile)
 }
 
-func addWatermark(videoFile string) error {
+func addWatermark(video models.Video) error {
 	// Get the current working directory
 	currentDir, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("error getting current directory: %v", err)
 	}
 
+	// Create a unique name for the watermarked file
+	baseName := uuid.New().String()
+
 	// Separate the original video's base name without extension
-	baseName := strings.TrimSuffix(filepath.Base(videoFile), filepath.Ext(videoFile))
-	outputFile := filepath.Join(currentDir, baseName+"_watermarked.mp4")
+	outputFile := filepath.Join(currentDir, baseName+".mp4")    // Full path to the watermarked video file
 	watermarkFile := filepath.Join(currentDir, "watermark.png") // Full path to the watermark image file
 
 	// Calculate video duration
-	totalVideoDuration, err := getVideoDuration(videoFile)
+	totalVideoDuration, err := getVideoDuration(*video.TranscodedPath)
 	if err != nil {
 		return fmt.Errorf("error getting video duration: %v", err)
 	}
@@ -75,7 +78,7 @@ func addWatermark(videoFile string) error {
 	}()
 
 	// Create ffmpeg command for each watermark position
-	cmd1 := exec.Command("ffmpeg", "-i", videoFile, "-i", watermarkFile, "-filter_complex",
+	cmd1 := exec.Command("ffmpeg", "-i", *video.TranscodedPath, "-i", watermarkFile, "-filter_complex",
 		fmt.Sprintf("[0:v][1:v]overlay=5:5:enable='between(t,%f,%f)'", part1Start, part1End),
 		"-c:a", "copy", "-c:v", "libx264", "-preset", "veryfast", intermediateFile1)
 
@@ -101,6 +104,9 @@ func addWatermark(videoFile string) error {
 
 	// Rename the final intermediate file to outputFile
 	err = os.Rename(intermediateFile4, outputFile)
+
+	// saves the watermarked video path to the database
+	saveWatermarkedVideo(video, outputFile)
 	if err != nil {
 		return fmt.Errorf("error renaming final watermarked video: %v", err)
 	}
@@ -108,10 +114,10 @@ func addWatermark(videoFile string) error {
 	return nil
 }
 
-func saveWatermarkedVideo(videoFile string) error {
-	// Implement logic to save the watermarked video to a storage service
-	// For now, we'll just log a message
-	fmt.Printf("Saving watermarked video '%s'\n", videoFile)
+func saveWatermarkedVideo(video models.Video, path string) error {
+	video.Path = &path
+	models.UpdateVideo(video)
+	fmt.Printf("Saving watermarked video '%s'\n", strconv.Itoa(int(video.ID)))
 	return nil
 }
 
