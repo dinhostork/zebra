@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 	"zebra/models"
 
 	"github.com/IBM/sarama"
@@ -116,6 +117,8 @@ func addWatermark(video models.Video) error {
 
 func saveWatermarkedVideo(video models.Video, path string) error {
 	video.Path = &path
+	now := time.Now()
+	video.ProcessedAt = &now
 	models.UpdateVideo(video)
 	fmt.Printf("Saving watermarked video '%s'\n", strconv.Itoa(int(video.ID)))
 	return nil
