@@ -11,12 +11,13 @@ var db *gorm.DB
 
 type Video struct {
 	gorm.Model
-	OriginalFilePath string     `json:"original_file_path"`
-	FilePath         string     `json:"file_path"`
-	Title            *string    `json:"title"`
-	ProcessedAt      *time.Time `json:"processed_at"`
-	Url              string     `json:"url"`
-	Failed           bool       `json:"failed"`
+	TempFilePath   string     `json:"temp_file_path"`
+	TranscodedPath *string    `json:"transcoded_path"`
+	Title          *string    `json:"title"`
+	ProcessedAt    *time.Time `json:"processed_at"`
+	Url            string     `json:"url"`
+	Failed         bool       `json:"failed"`
+	Original_id    *string    `json:"original_id"`
 }
 
 func init() {
@@ -36,4 +37,9 @@ func GetVideoById(id string) (*Video, *gorm.DB) {
 	var getVideo Video
 	db := db.Where("id = ?", id).Find(&getVideo)
 	return &getVideo, db
+}
+
+func UpdateVideo(video Video) (*Video, error) {
+	db.Save(&video)
+	return &video, nil
 }
