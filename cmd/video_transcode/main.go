@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"zebra/internal/video_transcode"
@@ -10,8 +11,9 @@ import (
 )
 
 func main() {
+	envPath := flag.String("envPath", ".env", "path to .env file")
 	fmt.Println("Starting video transcode service")
-	shared.LoadEnv("../..")
+	shared.LoadEnv(*envPath)
 
 	consumer, err := shared.InitKafkaConsumer()
 	if err != nil {

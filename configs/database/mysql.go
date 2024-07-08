@@ -13,8 +13,7 @@ var (
 )
 
 func Connect() {
-	shared.LoadEnv("../..")
-
+	shared.LoadEnv(".env")
 	user := os.Getenv("MYSQL_USER")
 	password := os.Getenv("MYSQL_PASSWORD")
 	host := os.Getenv("MYSQL_HOST")
