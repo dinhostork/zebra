@@ -5,6 +5,7 @@ import (
 	"log"
 	configs "zebra/configs/database"
 	"zebra/models"
+	"zebra/pkg/utils"
 	"zebra/shared"
 
 	"github.com/IBM/sarama"
@@ -19,9 +20,6 @@ func SendErrorMessage(video models.Video, failMessage string) {
 	}
 
 	defer producer.Close()
-
-	
-	
 
 	parsedVideo, err := json.Marshal(struct {
 		Video       models.Video `json:"video"`
@@ -46,6 +44,7 @@ func SendErrorMessage(video models.Video, failMessage string) {
 		log.Printf("Error sending error message: %v", err)
 	}
 
+	utils.RemoveFile(*video.TranscodedPath)
 	db := configs.GetDB()
 	defer db.Close()
 

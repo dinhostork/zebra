@@ -11,6 +11,7 @@ import (
 	"time"
 	"zebra/models"
 	"zebra/pkg/final_messages"
+	"zebra/pkg/utils"
 	"zebra/shared"
 
 	"github.com/IBM/sarama"
@@ -147,6 +148,9 @@ func saveWatermarkedVideo(video models.Video, path string) error {
 	models.UpdateVideo(video)
 	fmt.Printf("Saving watermarked video '%s'\n", strconv.Itoa(int(video.ID)))
 
+	log.Printf("Watermarked video path: %s\n", path)
+	// Remove the original video file
+	utils.RemoveFile(path)
 	// Send success message
 	final_messages.SendSuccessMessage(video)
 	return nil

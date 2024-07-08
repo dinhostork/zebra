@@ -5,6 +5,7 @@ import (
 	"log"
 	configs "zebra/configs/database"
 	"zebra/models"
+	"zebra/pkg/utils"
 	"zebra/shared"
 
 	"github.com/IBM/sarama"
@@ -35,6 +36,8 @@ func SendSuccessMessage(video models.Video) {
 	if err != nil {
 		log.Printf("Error sending success message: %v", err)
 	}
+
+	utils.RemoveFile(*video.TranscodedPath)
 
 	db := configs.GetDB()
 	defer db.Close()
