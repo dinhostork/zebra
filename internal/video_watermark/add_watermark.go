@@ -117,21 +117,23 @@ func addWatermark(video models.Video) error {
 }
 
 func saveWatermarkedVideo(video models.Video, path string) error {
-	video.Path = &path
+	file, err := os.Open(path)
+
+	if err != nil {
+		return fmt.Errorf("error opening file %s: %v", path, err)
+	}
+
+	url, err := shared.UploadVideoToS3(file, path, true)
+	if err != nil {
+		return fmt.Errorf("error uploading watermarked video to S3: %v", err)
+	}
+
+	video.Path = &url
 	now := time.Now()
 	video.ProcessedAt = &now
 	models.UpdateVideo(video)
 	fmt.Printf("Saving watermarked video '%s'\n", strconv.Itoa(int(video.ID)))
 
-	// upload watermarked file to S3
-	file, err := os.Open(path)
-	if err != nil {
-		return fmt.Errorf("error opening file %s: %v", path, err)
-	}
-
-	if err := shared.UploadVideoToS3(file, filepath.Base(path)); err != nil {
-		return fmt.Errorf("error uploading watermarked video to S3: %v", err)
-	}
 	return nil
 }
 

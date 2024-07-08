@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-func UploadVideoToS3(file *os.File, key string) error {
+func UploadVideoToS3(file *os.File, key string, public bool) (string, error) {
 	log.Println("Uploading video to S3")
 
 	endpoint := os.Getenv("AWS_ENDPOINT")
@@ -28,20 +28,27 @@ func UploadVideoToS3(file *os.File, key string) error {
 		Credentials:      credentials.NewStaticCredentials(accessKey, secretKey, ""),
 	})
 	if err != nil {
-		return fmt.Errorf("failed to create session: %v", err)
+		return "", fmt.Errorf("failed to create session: %v", err)
 	}
 
 	uploader := s3manager.NewUploader(sess)
-	_, err = uploader.Upload(&s3manager.UploadInput{
+	result, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 		Body:   file,
+		ACL: aws.String(func() string {
+			if public {
+				return "public-read"
+			} else {
+				return "private"
+			}
+		}()),
 	})
 	if err != nil {
-		return fmt.Errorf("failed to upload file: %v", err)
+		return "", fmt.Errorf("failed to upload file: %v", err)
 	}
 
 	log.Println("Video uploaded to S3")
 
-	return nil
+	return result.Location, nil
 }

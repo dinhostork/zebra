@@ -70,19 +70,21 @@ func transcodeToFormat(video models.Video, format string) error {
 		return fmt.Errorf("error running ffmpeg for %s: %v", format, err)
 	}
 
-	// save transcoded path to database
-	video.TranscodedPath = &outputFile
-	models.UpdateVideo(video)
-
 	// upload transcoded file to S3
 	file, err := os.Open(outputFile)
 	if err != nil {
 		return fmt.Errorf("error opening file %s: %v", outputFile, err)
 	}
 
-	if err := shared.UploadVideoToS3(file, baseName+format); err != nil {
-		return fmt.Errorf("error uploading transcoded video to S3: %v", err)
+	url, err := shared.UploadVideoToS3(file, baseName+format, false)
+	if err != nil {
+		return fmt.Errorf("error uploading file to S3: %v", err)
 	}
+
+	// save transcoded path to database
+	video.TranscodedPath = &url
+	models.UpdateVideo(video)
+
 	return nil
 }
 
