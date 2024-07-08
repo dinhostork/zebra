@@ -34,7 +34,9 @@ func ProcessMessage(msg *sarama.ConsumerMessage) {
 	if err := addWatermark(*videoFile); err != nil {
 		log.Printf("Failed to add watermark to video '%s': %v", strconv.Itoa(int(videoFile.ID)), err)
 		videoFile.Failed = true
-		final_messages.SendErrorMessage(*videoFile)
+		errorMessage := fmt.Sprintf("Failed to add watermark to video: %v", err)
+		videoFile.FaleidMessage = &errorMessage
+		final_messages.SendErrorMessage(*videoFile, err.Error())
 		return
 	}
 	fmt.Printf("Watermark added to video '%s'\n", strconv.Itoa(int(videoFile.ID)))
@@ -44,6 +46,7 @@ func ProcessMessage(msg *sarama.ConsumerMessage) {
 func addWatermark(video models.Video) error {
 	// Get the current working directory
 	currentDir, err := os.Getwd()
+
 	if err != nil {
 		return fmt.Errorf("error getting current directory: %v", err)
 	}

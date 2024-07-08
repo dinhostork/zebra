@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"zebra/models"
-	"zebra/shared"
 	"zebra/pkg/final_messages"
+	"zebra/shared"
 
 	"github.com/IBM/sarama"
 )
@@ -24,16 +24,20 @@ func handleMessage(msg *sarama.ConsumerMessage) {
 	}
 	if err := video.Save(); err != nil {
 		log.Printf("Error saving video to database: %v", err)
+		errorMessage := fmt.Sprintf("Error saving video to database: %v", err)
 		video.Failed = true
-		final_messages.SendErrorMessage(video)
+		video.FaleidMessage = &errorMessage
+		final_messages.SendErrorMessage(video, err.Error())
 		return
 	}
 
 	fmt.Printf("Video '%s' saved to database\n", videoFile)
 	if err := sendMessageToTranscodeService(fmt.Sprintf("%d", video.ID)); err != nil {
 		log.Printf("Error sending message to transcode service: %v", err)
+		errorMessage := fmt.Sprintf("Error sending message to transcode service: %v", err)
 		video.Failed = true
-		final_messages.SendErrorMessage(video)
+		video.FaleidMessage = &errorMessage
+		final_messages.SendErrorMessage(video, err.Error())
 		return
 	}
 

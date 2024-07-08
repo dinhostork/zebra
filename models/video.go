@@ -19,6 +19,7 @@ type Video struct {
 	Url            *string    `json:"url"`
 	Failed         bool       `json:"failed"`
 	Original_id    *string    `json:"original_id"`
+	FaleidMessage  *string    `json:"failed_message"`
 }
 
 func init() {
@@ -38,7 +39,7 @@ func (v *Video) Save() error {
 func GetVideoById(id string) (*Video, error) {
 	var getVideo Video
 	db := configs.GetDB()
-	
+
 	err := db.Where("id = ?", id).Find(&getVideo).Error
 	if err != nil {
 		return nil, err

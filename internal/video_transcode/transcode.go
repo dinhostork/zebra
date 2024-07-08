@@ -29,7 +29,9 @@ func ProcessMessage(msg *sarama.ConsumerMessage) {
 	if err := TranscodeVideo(*videoFile); err != nil {
 		log.Printf("Failed to transcode video '%s': %v", strconv.Itoa(int(videoFile.ID)), err)
 		videoFile.Failed = true
-		final_messages.SendErrorMessage(*videoFile)
+		errorMessage := fmt.Sprintf("Failed to transcode video: %v", err)
+		videoFile.FaleidMessage = &errorMessage
+		final_messages.SendErrorMessage(*videoFile, err.Error())
 		return
 	}
 	fmt.Printf("Video '%s' transcoded successfully\n", strconv.Itoa(int(videoFile.ID)))
@@ -64,7 +66,7 @@ func transcodeToFormat(video models.Video, format string) error {
 
 	switch format {
 	case ".mp4":
-		stream = stream.Output(outputFile, ffmpeg_go.KwArgs{"c:v": "libx264", "crf": 22, "preset": "fast", "vcodec": "h264"})
+		stream = stream.Output(outputFile, ffmpeg_go.KwArgs{"c:v": "libxfffsfs264", "crf": 22, "preset": "fast", "vcodec": "h264"})
 	default:
 		return fmt.Errorf("unsupported format: %s", format)
 	}
@@ -108,7 +110,9 @@ func SendToWatermarkService(video models.Video) {
 	if err != nil {
 		log.Printf("Error creating producer: %v", err)
 		video.Failed = true
-		final_messages.SendErrorMessage(video)
+		errorMessage := fmt.Sprintf("Error creating producer: %v", err)
+		video.FaleidMessage = &errorMessage
+		final_messages.SendErrorMessage(video, err.Error())
 		return
 	}
 
@@ -121,7 +125,9 @@ func SendToWatermarkService(video models.Video) {
 	if err != nil {
 		log.Printf("Error sending message to watermark service: %v", err)
 		video.Failed = true
-		final_messages.SendErrorMessage(video)
+		errorMessage := fmt.Sprintf("Error sending message to watermark service: %v", err)
+		video.FaleidMessage = &errorMessage
+		final_messages.SendErrorMessage(video, err.Error())
 		return
 	}
 
