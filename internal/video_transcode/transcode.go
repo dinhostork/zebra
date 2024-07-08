@@ -7,30 +7,36 @@ import (
 	"path/filepath"
 	"strconv"
 	"zebra/models"
+	"zebra/pkg/final_messages"
 	"zebra/shared"
 
-	"github.com/google/uuid"
-
 	"github.com/IBM/sarama"
+	"github.com/google/uuid"
 	ffmpeg_go "github.com/u2takey/ffmpeg-go"
 )
 
 func ProcessMessage(msg *sarama.ConsumerMessage) {
-	video_id := string(msg.Value)
-	fmt.Printf("Received video file: %s\n", video_id)
-	videoFile, db := models.GetVideoById(video_id)
-	defer db.Close()
+	videoID := string(msg.Value)
 
-	fmt.Printf("Transcoding video '%s'\n", video_id)
+	fmt.Printf("Received video file: %s\n", videoID)
+	videoFile, err := models.GetVideoById(videoID)
+	if err != nil {
+		log.Printf("Failed to get video '%s' from database: %v", videoID, err)
+		return
+	}
+
+	fmt.Printf("Transcoding video '%s'\n", videoID)
 	if err := TranscodeVideo(*videoFile); err != nil {
 		log.Printf("Failed to transcode video '%s': %v", strconv.Itoa(int(videoFile.ID)), err)
+		videoFile.Failed = true
+		final_messages.SendErrorMessage(*videoFile)
 		return
 	}
 	fmt.Printf("Video '%s' transcoded successfully\n", strconv.Itoa(int(videoFile.ID)))
 	defer RemoveFile(videoFile.TempFilePath)
 
 	SendToWatermarkService(*videoFile)
-	fmt.Printf("Video '%s' sent to watermark service\n", video_id)
+	fmt.Printf("Video '%s' sent to watermark service\n", videoID)
 }
 
 func TranscodeVideo(video models.Video) error {
@@ -83,7 +89,9 @@ func transcodeToFormat(video models.Video, format string) error {
 	// save transcoded path to database
 	video.TranscodedPath = &outputFile
 	video.TranscodedUrl = &url
-	models.UpdateVideo(video)
+	if _, err := models.UpdateVideo(video); err != nil {
+		return fmt.Errorf("error updating video in database: %v", err)
+	}
 
 	return nil
 }
@@ -99,6 +107,8 @@ func SendToWatermarkService(video models.Video) {
 	producer, err := shared.InitKafkaProducer(shared.VIDEO_WATERMARK_TOPIC)
 	if err != nil {
 		log.Printf("Error creating producer: %v", err)
+		video.Failed = true
+		final_messages.SendErrorMessage(video)
 		return
 	}
 
@@ -110,9 +120,10 @@ func SendToWatermarkService(video models.Video) {
 	})
 	if err != nil {
 		log.Printf("Error sending message to watermark service: %v", err)
+		video.Failed = true
+		final_messages.SendErrorMessage(video)
 		return
 	}
 
 	fmt.Printf("Video '%s' sent to watermark service\n", strconv.Itoa(int(video.ID)))
-
 }

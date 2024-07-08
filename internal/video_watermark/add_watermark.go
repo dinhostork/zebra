@@ -10,26 +10,31 @@ import (
 	"strings"
 	"time"
 	"zebra/models"
-	"zebra/shared"
 	"zebra/pkg/final_messages"
+	"zebra/shared"
 
 	"github.com/IBM/sarama"
 	"github.com/google/uuid"
 )
 
 func ProcessMessage(msg *sarama.ConsumerMessage) {
-	video_id := string(msg.Value)
+	videoID := string(msg.Value)
 
-	fmt.Printf("Received video file: %s\n", video_id)
+	fmt.Printf("Received video file: %s\n", videoID)
 
 	// Get the video file from the database
-	videoFile, db := models.GetVideoById(video_id)
+	videoFile, err := models.GetVideoById(videoID)
 
-	defer db.Close()
+	if err != nil {
+		log.Printf("Failed to get video '%s' from database: %v", videoID, err)
+		return
+	}
 
 	fmt.Printf("Adding watermark to video '%s'\n", strconv.Itoa(int(videoFile.ID)))
 	if err := addWatermark(*videoFile); err != nil {
 		log.Printf("Failed to add watermark to video '%s': %v", strconv.Itoa(int(videoFile.ID)), err)
+		videoFile.Failed = true
+		final_messages.SendErrorMessage(*videoFile)
 		return
 	}
 	fmt.Printf("Watermark added to video '%s'\n", strconv.Itoa(int(videoFile.ID)))
@@ -109,7 +114,9 @@ func addWatermark(video models.Video) error {
 	err = os.Rename(intermediateFile4, outputFile)
 
 	// saves the watermarked video path to the database
-	saveWatermarkedVideo(video, outputFile)
+	if err := saveWatermarkedVideo(video, outputFile); err != nil {
+		return fmt.Errorf("error saving watermarked video: %v", err)
+	}
 	if err != nil {
 		return fmt.Errorf("error renaming final watermarked video: %v", err)
 	}

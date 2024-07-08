@@ -28,20 +28,29 @@ func init() {
 }
 
 func (v *Video) Save() error {
+	db := configs.GetDB()
 	if err := db.Create(&v).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetVideoById(id string) (*Video, *gorm.DB) {
+func GetVideoById(id string) (*Video, error) {
 	var getVideo Video
-	db := configs.GetDB() // Open the database connection
-	db = db.Where("id = ?", id).Find(&getVideo)
-	return &getVideo, db
+	db := configs.GetDB()
+	defer db.Close()
+	err := db.Where("id = ?", id).Find(&getVideo).Error
+	if err != nil {
+		return nil, err
+	}
+	return &getVideo, nil
 }
 
 func UpdateVideo(video Video) (*Video, error) {
-	db.Save(&video)
+	db := configs.GetDB()
+	defer db.Close()
+	if err := db.Save(&video).Error; err != nil {
+		return nil, err
+	}
 	return &video, nil
 }
