@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copy .env file to build folder
+cp .env.production build/.env
 
 # Build video_consumer
 GOOS=linux GOARCH=amd64 go build -o build/video_consumer ./cmd/video_consumer
