@@ -12,11 +12,11 @@ var db *gorm.DB
 type Video struct {
 	gorm.Model
 	TempFilePath   string     `json:"temp_file_path"`
+	TranscodedUrl  *string    `json:"transcoded_url"`
 	TranscodedPath *string    `json:"transcoded_path"`
-	Path           *string    `json:"path"`
 	Title          *string    `json:"title"`
 	ProcessedAt    *time.Time `json:"processed_at"`
-	Url            string     `json:"url"`
+	Url            *string    `json:"url"`
 	Failed         bool       `json:"failed"`
 	Original_id    *string    `json:"original_id"`
 }
@@ -36,7 +36,8 @@ func (v *Video) Save() error {
 
 func GetVideoById(id string) (*Video, *gorm.DB) {
 	var getVideo Video
-	db := db.Where("id = ?", id).Find(&getVideo)
+	db := configs.GetDB() // Open the database connection
+	db = db.Where("id = ?", id).Find(&getVideo)
 	return &getVideo, db
 }
 
