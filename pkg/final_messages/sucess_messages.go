@@ -3,6 +3,7 @@ package final_messages
 import (
 	"encoding/json"
 	"log"
+	configs "zebra/configs/database"
 	"zebra/models"
 	"zebra/shared"
 
@@ -34,5 +35,8 @@ func SendSuccessMessage(video models.Video) {
 	if err != nil {
 		log.Printf("Error sending success message: %v", err)
 	}
+
+	db := configs.GetDB()
+	defer db.Close()
 
 }

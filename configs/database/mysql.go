@@ -30,5 +30,8 @@ func Connect() {
 }
 
 func GetDB() *gorm.DB {
+	if db == nil || db.DB().Ping() != nil {
+		Connect()
+	}
 	return db
 }

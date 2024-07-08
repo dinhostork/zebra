@@ -38,7 +38,7 @@ func (v *Video) Save() error {
 func GetVideoById(id string) (*Video, error) {
 	var getVideo Video
 	db := configs.GetDB()
-	defer db.Close()
+	
 	err := db.Where("id = ?", id).Find(&getVideo).Error
 	if err != nil {
 		return nil, err
@@ -48,7 +48,6 @@ func GetVideoById(id string) (*Video, error) {
 
 func UpdateVideo(video Video) (*Video, error) {
 	db := configs.GetDB()
-	defer db.Close()
 	if err := db.Save(&video).Error; err != nil {
 		return nil, err
 	}
