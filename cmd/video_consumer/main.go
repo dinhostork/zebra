@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"zebra/internal/video_consumer"
@@ -11,10 +10,8 @@ import (
 )
 
 func main() {
-	envPath := flag.String("envPath", ".env", "path to .env file")
-	log.Println(envPath)
 	fmt.Println("Starting video consumer")
-	shared.LoadEnv(*envPath)
+	shared.LoadEnv()
 
 	consumer, err := shared.InitKafkaConsumer()
 	if err != nil {
