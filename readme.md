@@ -31,7 +31,7 @@ Zebra is a tool designed for watermarking videos. It is built using Go and Kafka
 ## Architecture
 Zebra follows a producer-consumer architecture as illustrated in the diagram below:
 
-[![Architecture](docs/arch.png)](docs/arch.png)  
+[![Architecture](docs/architecture_b2.svg)](docs/architecture_b2.svg)  
 Figure 1: Draft of the architecture of Zebra
 
 ### Handle Upload
