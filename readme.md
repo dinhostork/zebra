@@ -17,6 +17,9 @@
     - [With Docker](#with-docker)
     - [Without Docker](#without-docker)
     - [Watermarking](#watermarking)
+  - [Build](#build)
+  - [Contributing](#contributing)
+  - [Author](#author)
 
 
 ## Attention
@@ -151,3 +154,28 @@ this will upload the video and start the watermarking process.
 ### Watermarking
 The watermarking process is done using ffmpeg. The watermark stays 25% in each corner of the video. The watermark is a SVG image that is converted to a PNG image.
 You can change the watermark image by replacing the `watermark.svg` file in the `assets` directory.
+
+## Build
+fist create a `.env.production` file in the root directory of the project. You can use the `.env.example` file as a template.
+
+To build the project, you can use the following command:
+```shell script
+chmod +x build.sh
+./build.sh
+```
+
+This command will create a the binary of service in the `build` directory.
+
+to run builded services you can use the following commands:
+```shell script
+    ./build/main --envType=production
+```
+this is will start all services.
+
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+
+## Author
+- [Dinho Stork](https://github.com/dinhostork)
