@@ -123,12 +123,14 @@ func saveWatermarkedVideo(video models.Video, path string) error {
 		return fmt.Errorf("error opening file %s: %v", path, err)
 	}
 
-	url, err := shared.UploadVideoToS3(file, path, true)
+	filename := filepath.Base(path)
+
+	url, err := shared.UploadVideoToS3(file, filename, true)
 	if err != nil {
 		return fmt.Errorf("error uploading watermarked video to S3: %v", err)
 	}
 
-	video.Path = &url
+	video.Url = &url
 	now := time.Now()
 	video.ProcessedAt = &now
 	models.UpdateVideo(video)

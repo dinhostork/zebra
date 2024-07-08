@@ -81,7 +81,8 @@ func transcodeToFormat(video models.Video, format string) error {
 	}
 
 	// save transcoded path to database
-	video.TranscodedPath = &url
+	video.TranscodedPath = &outputFile
+	video.TranscodedUrl = &url
 	models.UpdateVideo(video)
 
 	return nil
