@@ -30,7 +30,7 @@ func ProcessMessage(msg *sarama.ConsumerMessage) {
 		log.Printf("Failed to transcode video '%s': %v", strconv.Itoa(int(videoFile.ID)), err)
 		videoFile.Failed = true
 		errorMessage := fmt.Sprintf("Failed to transcode video: %v", err)
-		videoFile.FaleidMessage = &errorMessage
+		videoFile.FailedMessage = &errorMessage
 		final_messages.SendErrorMessage(*videoFile, err.Error())
 		return
 	}
@@ -111,7 +111,7 @@ func SendToWatermarkService(video models.Video) {
 		log.Printf("Error creating producer: %v", err)
 		video.Failed = true
 		errorMessage := fmt.Sprintf("Error creating producer: %v", err)
-		video.FaleidMessage = &errorMessage
+		video.FailedMessage = &errorMessage
 		final_messages.SendErrorMessage(video, err.Error())
 		return
 	}
@@ -126,7 +126,7 @@ func SendToWatermarkService(video models.Video) {
 		log.Printf("Error sending message to watermark service: %v", err)
 		video.Failed = true
 		errorMessage := fmt.Sprintf("Error sending message to watermark service: %v", err)
-		video.FaleidMessage = &errorMessage
+		video.FailedMessage = &errorMessage
 		final_messages.SendErrorMessage(video, err.Error())
 		return
 	}

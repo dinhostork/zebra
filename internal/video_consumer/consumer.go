@@ -26,7 +26,7 @@ func handleMessage(msg *sarama.ConsumerMessage) {
 		log.Printf("Error saving video to database: %v", err)
 		errorMessage := fmt.Sprintf("Error saving video to database: %v", err)
 		video.Failed = true
-		video.FaleidMessage = &errorMessage
+		video.FailedMessage = &errorMessage
 		final_messages.SendErrorMessage(video, err.Error())
 		return
 	}
@@ -36,7 +36,7 @@ func handleMessage(msg *sarama.ConsumerMessage) {
 		log.Printf("Error sending message to transcode service: %v", err)
 		errorMessage := fmt.Sprintf("Error sending message to transcode service: %v", err)
 		video.Failed = true
-		video.FaleidMessage = &errorMessage
+		video.FailedMessage = &errorMessage
 		final_messages.SendErrorMessage(video, err.Error())
 		return
 	}

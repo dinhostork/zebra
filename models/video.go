@@ -19,7 +19,7 @@ type Video struct {
 	Url            *string    `json:"url"`
 	Failed         bool       `json:"failed"`
 	Original_id    *string    `json:"original_id"`
-	FaleidMessage  *string    `json:"failed_message"`
+	FailedMessage  *string    `json:"failed_message"`
 }
 
 func init() {
