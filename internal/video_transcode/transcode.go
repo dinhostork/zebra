@@ -52,7 +52,6 @@ func transcodeToFormat(video models.Video, format string) error {
 	// create a unique name for the transcoded file
 	baseName := uuid.New().String()
 
-	//baseName := strings.TrimSuffix(filepath.Base(video.TempFilePath), filepath.Ext(video.TempFilePath))
 	outputFile := filepath.Join(currentDir, baseName+format)
 
 	stream := ffmpeg_go.Input(video.TempFilePath)
