@@ -11,7 +11,7 @@ import (
 // LoadEnv loads the .env file from the root directory of the project
 func LoadEnv() {
 	// Get the root directory of the project
-	rootDir, err := getRootDir()
+	rootDir, err := GetRootDir()
 	if err != nil {
 		println(err)
 		panic("Error getting project root directory: " + err.Error())
@@ -26,7 +26,7 @@ func LoadEnv() {
 }
 
 // getRootDir returns the root directory of the project
-func getRootDir() (string, error) {
+func GetRootDir() (string, error) {
 	// Get current working directory
 	wd, err := os.Getwd()
 	if err != nil {

@@ -54,18 +54,23 @@ func addWatermark(video models.Video) error {
 	baseName := uuid.New().String()
 
 	// Separate the original video's base name without extension
-	outputFile := filepath.Join(currentDir, baseName+".mp4")    // Full path to the watermarked video file
-	watermarkFile := filepath.Join(currentDir, "watermark.svg") // Full path to the watermark image file
+	outputFile := filepath.Join(currentDir, baseName+".mp4") // Full path to the watermarked video file
+	// watermark is in assets folder in root directory
+	rootDir, err := shared.GetRootDir()
+	if err != nil {
+		return fmt.Errorf("error getting project root directory: %v", err)
+	}
+	watermarkFile := filepath.Join(rootDir, "assets", "watermark.svg")
 
 	// Get video resolution
-	width, height, err := getVideoResolution(*video.TranscodedPath)
+	width, _, err := getVideoResolution(*video.TranscodedPath)
 	if err != nil {
 		return fmt.Errorf("error getting video resolution: %v", err)
 	}
 
 	// Resize watermark based on video resolution
 	resizedWatermarkFile := filepath.Join(currentDir, baseName+"_resized_watermark.png")
-	if err := resizeWatermark(watermarkFile, resizedWatermarkFile, width, height); err != nil {
+	if err := resizeWatermark(watermarkFile, resizedWatermarkFile, width); err != nil {
 		return fmt.Errorf("error resizing watermark: %v", err)
 	}
 
@@ -165,7 +170,7 @@ func getVideoResolution(videoFile string) (int, int, error) {
 	return width, height, nil
 }
 
-func resizeWatermark(inputFile, outputFile string, videoWidth, videoHeight int) error {
+func resizeWatermark(inputFile, outputFile string, videoWidth int) error {
 	// Assume original watermark size is 100x100 pixels
 	originalWidth := 100
 	originalHeight := 100
