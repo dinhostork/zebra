@@ -11,7 +11,7 @@ import (
 	"time"
 	"zebra/models"
 	"zebra/shared"
-	"zebra/shared/final_messages"
+	"zebra/pkg/final_messages"
 
 	"github.com/IBM/sarama"
 	"github.com/google/uuid"
