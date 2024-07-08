@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 	"zebra/models"
+	"zebra/shared"
 
 	"github.com/IBM/sarama"
 	"github.com/google/uuid"
@@ -121,6 +122,16 @@ func saveWatermarkedVideo(video models.Video, path string) error {
 	video.ProcessedAt = &now
 	models.UpdateVideo(video)
 	fmt.Printf("Saving watermarked video '%s'\n", strconv.Itoa(int(video.ID)))
+
+	// upload watermarked file to S3
+	file, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("error opening file %s: %v", path, err)
+	}
+
+	if err := shared.UploadVideoToS3(file, filepath.Base(path)); err != nil {
+		return fmt.Errorf("error uploading watermarked video to S3: %v", err)
+	}
 	return nil
 }
 
