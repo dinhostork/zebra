@@ -11,6 +11,7 @@ import (
 	"time"
 	"zebra/models"
 	"zebra/shared"
+	"zebra/shared/final_messages"
 
 	"github.com/IBM/sarama"
 	"github.com/google/uuid"
@@ -136,6 +137,8 @@ func saveWatermarkedVideo(video models.Video, path string) error {
 	models.UpdateVideo(video)
 	fmt.Printf("Saving watermarked video '%s'\n", strconv.Itoa(int(video.ID)))
 
+	// Send success message
+	final_messages.SendSuccessMessage(video)
 	return nil
 }
 
