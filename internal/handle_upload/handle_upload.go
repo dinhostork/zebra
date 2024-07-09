@@ -43,7 +43,6 @@ func HandleUpload(w http.ResponseWriter, r *http.Request) {
 	}
 	defer producer.Close()
 
-	// Send the video file path to the video upload topic
 	_, _, err = producer.SendMessage(&sarama.ProducerMessage{
 		Topic: shared.VIDEO_UPLOAD_TOPIC,
 		Value: sarama.StringEncoder(tempFile.Name()),
