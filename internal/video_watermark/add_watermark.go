@@ -69,10 +69,15 @@ func addWatermark(video models.Video) error {
 	}
 
 	// Resize watermark based on video resolution
-	resizedWatermarkFile := filepath.Join(currentDir, baseName+"_resized_watermark.png")
+	resizedWatermarkFile := filepath.Join(rootDir, "temp", baseName+"_resized_watermark.png")
 	if err := resizeWatermark(watermarkFile, resizedWatermarkFile, width); err != nil {
 		return fmt.Errorf("error resizing watermark: %v", err)
 	}
+
+	// Defer function to remove resized watermark file on function exit or error
+	defer func() {
+		os.Remove(resizedWatermarkFile)
+	}()
 
 	// Calculate video duration
 	totalVideoDuration, err := getVideoDuration(*video.TranscodedPath)
@@ -91,10 +96,10 @@ func addWatermark(video models.Video) error {
 	part4End := totalVideoDuration
 
 	// Create intermediate filenames
-	intermediateFile1 := filepath.Join(currentDir, baseName+"_part1.mp4")
-	intermediateFile2 := filepath.Join(currentDir, baseName+"_part2.mp4")
-	intermediateFile3 := filepath.Join(currentDir, baseName+"_part3.mp4")
-	intermediateFile4 := filepath.Join(currentDir, baseName+"_part4.mp4")
+	intermediateFile1 := filepath.Join(rootDir, "temp", "watermark", baseName+"_part1.mp4")
+	intermediateFile2 := filepath.Join(rootDir, "temp", "watermark", baseName+"_part2.mp4")
+	intermediateFile3 := filepath.Join(rootDir, "temp", "watermark", baseName+"_part3.mp4")
+	intermediateFile4 := filepath.Join(rootDir, "temp", "watermark", baseName+"_part4.mp4")
 
 	// Defer function to remove intermediate files on function exit or error
 	defer func() {

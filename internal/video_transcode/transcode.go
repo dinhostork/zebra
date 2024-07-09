@@ -52,15 +52,15 @@ func TranscodeVideo(video models.Video) error {
 }
 
 func transcodeToFormat(video models.Video, format string) error {
-	currentDir, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("error getting current directory: %v", err)
-	}
 
 	// create a unique name for the transcoded file
 	baseName := uuid.New().String()
+	root, err := shared.GetRootDir()
+	if err != nil {
+		return fmt.Errorf("error getting root directory: %v", err)
+	}
 
-	outputFile := filepath.Join(currentDir, baseName+format)
+	outputFile := filepath.Join(root, "temp", "transcoded", baseName+format)
 
 	stream := ffmpeg_go.Input(video.TempFilePath)
 
