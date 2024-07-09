@@ -2,6 +2,7 @@ package shared
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -16,6 +17,8 @@ func LoadEnv() {
 		println(err)
 		panic("Error getting project root directory: " + err.Error())
 	}
+
+	log.Printf("Loading .env file from %s\n", rootDir)
 
 	// Load .env file from the root directory
 	err = godotenv.Load(filepath.Join(rootDir, ".env"))

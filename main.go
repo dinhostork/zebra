@@ -33,7 +33,6 @@ func startAPIServer() {
 }
 
 func startService(name, path string) {
-	fmt.Printf("Starting %s service\n", name)
 	cmd := exec.Command(path)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

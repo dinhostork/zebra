@@ -35,10 +35,8 @@ func ProcessMessage(msg *sarama.ConsumerMessage) {
 		return
 	}
 	fmt.Printf("Video '%s' transcoded successfully\n", strconv.Itoa(int(videoFile.ID)))
-	defer RemoveFile(videoFile.TempFilePath)
 
 	SendToWatermarkService(*videoFile)
-	fmt.Printf("Video '%s' sent to watermark service\n", videoID)
 }
 
 func TranscodeVideo(video models.Video) error {

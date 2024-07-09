@@ -44,22 +44,18 @@ func ProcessMessage(msg *sarama.ConsumerMessage) {
 }
 
 func addWatermark(video models.Video) error {
-	// Get the current working directory
-	currentDir, err := os.Getwd()
+	rootDir, err := shared.GetRootDir()
 	if err != nil {
-		return fmt.Errorf("error getting current directory: %v", err)
+		return fmt.Errorf("error getting project root directory: %v", err)
 	}
 
 	// Create a unique name for the watermarked file
 	baseName := uuid.New().String()
 
 	// Separate the original video's base name without extension
-	outputFile := filepath.Join(currentDir, baseName+".mp4") // Full path to the watermarked video file
+	outputFile := filepath.Join(rootDir, "temp", "watermark", baseName+"_watermarked.mp4")
 	// watermark is in assets folder in root directory
-	rootDir, err := shared.GetRootDir()
-	if err != nil {
-		return fmt.Errorf("error getting project root directory: %v", err)
-	}
+	
 	watermarkFile := filepath.Join(rootDir, "assets", "watermark.svg")
 
 	// Get video resolution
@@ -213,7 +209,7 @@ func saveWatermarkedVideo(video models.Video, path string) error {
 	models.UpdateVideo(video)
 	fmt.Printf("Saving watermarked video '%s'\n", strconv.Itoa(int(video.ID)))
 
-	log.Printf("Watermarked video path: %s\n", path)
+	
 	// Remove the original video file
 	utils.RemoveFile(path)
 	// Send success message
