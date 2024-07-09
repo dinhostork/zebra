@@ -1,4 +1,7 @@
 #!/bin/bash
+# Clean build folder
+rm -rf build
+mkdir build
 # Copy .env file to build folder
 cp .env.production build/.env
 
