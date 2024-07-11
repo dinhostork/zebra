@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const ONE_SECOND = 1000000000
 
 var videoUploadTopic = "video.upload.topic"
 
