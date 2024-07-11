@@ -6,12 +6,15 @@ import (
 	"github.com/IBM/sarama"
 )
 
-var mockProducer sarama.SyncProducer
+var (
+	mockProducer sarama.SyncProducer
+	mockConsumer sarama.Consumer
+)
 
 func InitKafkaProducer(topic string) (sarama.SyncProducer, error) {
 	LoadEnv()
 	kafkaHost := os.Getenv("KAFKA_HOST")
-	kafaPort := os.Getenv("KAFKA_PORT")
+	kafkaPort := os.Getenv("KAFKA_PORT")
 
 	if mockProducer != nil {
 		return mockProducer, nil
@@ -19,7 +22,7 @@ func InitKafkaProducer(topic string) (sarama.SyncProducer, error) {
 
 	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
-	producer, err := sarama.NewSyncProducer([]string{kafkaHost + ":" + kafaPort}, config)
+	producer, err := sarama.NewSyncProducer([]string{kafkaHost + ":" + kafkaPort}, config)
 	if err != nil {
 		return nil, err
 	}
@@ -28,10 +31,17 @@ func InitKafkaProducer(topic string) (sarama.SyncProducer, error) {
 }
 
 func InitKafkaConsumer() (sarama.Consumer, error) {
+	LoadEnv()
+	kafkaHost := os.Getenv("KAFKA_HOST")
+	kafkaPort := os.Getenv("KAFKA_PORT")
+
 	config := sarama.NewConfig()
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 
-	brokers := []string{"localhost:9092"}
+	brokers := []string{kafkaHost + ":" + kafkaPort}
+	if mockConsumer != nil {
+		return mockConsumer, nil
+	}
 	consumer, err := sarama.NewConsumer(brokers, config)
 	if err != nil {
 		return nil, err
@@ -42,4 +52,8 @@ func InitKafkaConsumer() (sarama.Consumer, error) {
 
 func SetKafkaProducer(producer sarama.SyncProducer) {
 	mockProducer = producer
+}
+
+func SetKafkaConsumer(consumer sarama.Consumer) {
+	mockConsumer = consumer
 }
