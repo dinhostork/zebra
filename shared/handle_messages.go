@@ -7,7 +7,7 @@ import (
 )
 
 // HandleMessages consumes messages from a Kafka partition consumer
-func HandleMessages(partitionConsumer sarama.PartitionConsumer, processMessage func(msg *sarama.ConsumerMessage)) {
+func HandleMessages(partitionConsumer sarama.PartitionConsumer, processMessage func(msg *sarama.ConsumerMessage) *sarama.ConsumerMessage) {
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
