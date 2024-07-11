@@ -1,3 +1,4 @@
+// main.go
 package main
 
 import (
@@ -25,5 +26,6 @@ func main() {
 	}
 	defer partitionConsumer.Close()
 
-	video_consumer.HandleMessages(partitionConsumer)
+	handler := &video_consumer.DefaultMessageHandler{}
+	video_consumer.HandleMessages(partitionConsumer, handler)
 }
