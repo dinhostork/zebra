@@ -9,10 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
-var videoUploadTopic = "video.upload.topic"
-
 func TestVideoConsumer(t *testing.T) {
+	const videoUploadTopic = "video.upload.topic"
+
 	appmock.SetupMockKafka(t, videoUploadTopic, "test_key", "test_video_file.mp4")
 
 	testMessage := &sarama.ConsumerMessage{
