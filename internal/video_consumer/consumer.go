@@ -5,16 +5,20 @@ import (
 	"log"
 	"zebra/models"
 	"zebra/pkg/final_messages"
+	"zebra/pkg/handlers"
 	"zebra/shared"
 
 	"github.com/IBM/sarama"
 )
 
-func HandleMessages(partitionConsumer sarama.PartitionConsumer) {
-	shared.HandleMessages(partitionConsumer, handleMessage)
+type DefaultMessageHandler struct{}
+
+// HandleMessages consumes messages from a Kafka partition consumer
+func HandleMessages(partitionConsumer sarama.PartitionConsumer, handler handlers.MessageHandler) {
+	shared.HandleMessages(partitionConsumer, handler.HandleMessage)
 }
 
-func handleMessage(msg *sarama.ConsumerMessage) {
+func (h DefaultMessageHandler) HandleMessage(msg *sarama.ConsumerMessage) *sarama.ConsumerMessage {
 	videoFile := string(msg.Value)
 	fmt.Printf("Received video file: %s\n", videoFile)
 
@@ -28,7 +32,7 @@ func handleMessage(msg *sarama.ConsumerMessage) {
 		video.Failed = true
 		video.FailedMessage = &errorMessage
 		final_messages.SendErrorMessage(video, err.Error())
-		return
+		return msg // Return the last processed message
 	}
 
 	fmt.Printf("Video '%s' saved to database\n", videoFile)
@@ -38,10 +42,12 @@ func handleMessage(msg *sarama.ConsumerMessage) {
 		video.Failed = true
 		video.FailedMessage = &errorMessage
 		final_messages.SendErrorMessage(video, err.Error())
-		return
+		return msg // Return the last processed message
 	}
 
 	fmt.Printf("Video '%s' sent to transcoding service\n", videoFile)
+
+	return msg // Return the last processed message
 }
 
 func sendMessageToTranscodeService(videoID string) error {

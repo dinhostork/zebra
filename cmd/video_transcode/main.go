@@ -26,5 +26,6 @@ func main() {
 	}
 	defer partitionConsumer.Close()
 
-	shared.HandleMessages(partitionConsumer, video_transcode.ProcessMessage)
+	handler := &video_transcode.DefaultMessageHandler{}
+	video_transcode.HandleMessages(partitionConsumer, handler)
 }

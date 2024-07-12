@@ -11,6 +11,7 @@ import (
 	"time"
 	"zebra/models"
 	"zebra/pkg/final_messages"
+	"zebra/pkg/handlers"
 	"zebra/pkg/utils"
 	"zebra/shared"
 
@@ -18,7 +19,14 @@ import (
 	"github.com/google/uuid"
 )
 
-func ProcessMessage(msg *sarama.ConsumerMessage) {
+type DefaultMessageHandler struct{}
+
+func HandleMessages(partitionConsumer sarama.PartitionConsumer, handler handlers.MessageHandler) {
+	shared.HandleMessages(partitionConsumer, handler.HandleMessage)
+
+}
+
+func (h DefaultMessageHandler) HandleMessage(msg *sarama.ConsumerMessage) *sarama.ConsumerMessage {
 	videoID := string(msg.Value)
 
 	fmt.Printf("Received video file: %s\n", videoID)
@@ -28,7 +36,7 @@ func ProcessMessage(msg *sarama.ConsumerMessage) {
 
 	if err != nil {
 		log.Printf("Failed to get video '%s' from database: %v", videoID, err)
-		return
+		return msg
 	}
 
 	fmt.Printf("Adding watermark to video '%s'\n", strconv.Itoa(int(videoFile.ID)))
@@ -38,9 +46,11 @@ func ProcessMessage(msg *sarama.ConsumerMessage) {
 		errorMessage := fmt.Sprintf("Failed to add watermark to video: %v", err)
 		videoFile.FailedMessage = &errorMessage
 		final_messages.SendErrorMessage(*videoFile, err.Error())
-		return
+		return msg
 	}
+
 	fmt.Printf("Watermark added to video '%s'\n", strconv.Itoa(int(videoFile.ID)))
+	return msg
 }
 
 func addWatermark(video models.Video) error {
@@ -55,7 +65,7 @@ func addWatermark(video models.Video) error {
 	// Separate the original video's base name without extension
 	outputFile := filepath.Join(rootDir, "temp", "watermark", baseName+"_watermarked.mp4")
 	// watermark is in assets folder in root directory
-	
+
 	watermarkFile := filepath.Join(rootDir, "assets", "watermark.svg")
 
 	// Get video resolution
@@ -209,7 +219,6 @@ func saveWatermarkedVideo(video models.Video, path string) error {
 	models.UpdateVideo(video)
 	fmt.Printf("Saving watermarked video '%s'\n", strconv.Itoa(int(video.ID)))
 
-	
 	// Remove the original video file
 	utils.RemoveFile(path)
 	// Send success message

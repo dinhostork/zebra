@@ -6,6 +6,8 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 var (
@@ -13,20 +15,28 @@ var (
 )
 
 func Connect() {
-
 	shared.LoadEnv()
 	user := os.Getenv("MYSQL_USER")
 	password := os.Getenv("MYSQL_PASSWORD")
 	host := os.Getenv("MYSQL_HOST")
 	database := os.Getenv("MYSQL_DATABASE")
+	var err error
 
 	connectionString := user + ":" + password + "@tcp(" + host + ")/" + database + "?charset=utf8&parseTime=True&loc=Local"
 
-	d, err := gorm.Open("mysql", connectionString)
+	rootDir, err := shared.GetRootDir()
 	if err != nil {
 		panic(err)
 	}
-	db = d
+
+	if os.Getenv("ENV") == "test" {
+		db, err = gorm.Open("sqlite3", rootDir+"/test.db")
+	} else {
+		db, err = gorm.Open("mysql", connectionString)
+	}
+	if err != nil {
+		panic(err)
+	}
 }
 
 func GetDB() *gorm.DB {
