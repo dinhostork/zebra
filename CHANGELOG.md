@@ -11,3 +11,6 @@ All notable changes to this project will be documented in this file.
 ## [0.0.2] - 2024-07-08
 - Added: Temporary folder for video processing.
 - Fixed: Services comunications issues.
+
+## [0.0.3] - 2024-07-11
+- Added: Basic tests for video_consumer, video_transcoder and video_watermarker.
