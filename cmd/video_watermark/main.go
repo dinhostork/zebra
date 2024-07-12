@@ -25,6 +25,6 @@ func main() {
 		log.Fatalf("Failed to start partition consumer: %v", err)
 	}
 	defer partitionConsumer.Close()
-
-	shared.HandleMessages(partitionConsumer, video_watermark.ProcessMessage)
+	handler := video_watermark.DefaultMessageHandler{}
+	video_watermark.HandleMessages(partitionConsumer, handler)
 }
