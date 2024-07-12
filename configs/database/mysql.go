@@ -7,8 +7,6 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 
-	// Disable warnings for sqlite3 package
-	// #cgo CFLAGS: -Wno-return-local-addr
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
