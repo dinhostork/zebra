@@ -49,3 +49,6 @@ build/
 
 # temp
 temp/
+
+# tests database
+test.db
